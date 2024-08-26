@@ -10,8 +10,11 @@ CORS(app)
 spark = SparkSession.builder.appName('SalaryPrediction').getOrCreate()
 
 # Load your pipeline model
-pipelineModel = PipelineModel.load("path/to/your/pipelineModel")
+from pyspark.ml import PipelineModel
+from pyspark.ml.regression import GBTRegressionModel
 
+pipelineModel = PipelineModel.load("./model/pipeline_model_gbt")
+GBTModel = GBTRegressionModel.load('./model/gbt_model1')
 @app.route('/')
 def home():
     return "Employee Salary Prediction API is running!"
@@ -39,9 +42,11 @@ def predict_salary():
     # Transform the new data using the pipeline
     transformed_new_data = pipelineModel.transform(new_data)
 
-    # Predict the salary
-    predictions = transformed_new_data.select("prediction").collect()
-    predicted_salary = predictions[0]["prediction"]
+    # Make predictions
+    predictions = GBTModel.transform(transformed_new_data)
+
+    # Get the predicted salary
+    predicted_salary = predictions.select("prediction").collect()[0]["prediction"]
 
     return jsonify({"predicted_salary": predicted_salary})
 
