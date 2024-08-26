@@ -1,32 +1,45 @@
-from flask import Flask, request, jsonify
-from flask_cors import CORS
-from pyspark.sql import SparkSession
 import os
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+from pyspark.sql import SparkSession
+from pyspark.ml import PipelineModel
+from pyspark.ml.regression import GBTRegressionModel
+from fastapi.middleware.cors import CORSMiddleware
 
-app = Flask(__name__)
-CORS(app)
+app = FastAPI()
+
+# Enable CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Initialize Spark session
 spark = SparkSession.builder.appName('SalaryPrediction').getOrCreate()
 
 # Load your pipeline model
-from pyspark.ml import PipelineModel
-from pyspark.ml.regression import GBTRegressionModel
-
 pipelineModel = PipelineModel.load("./model/pipeline_model_gbt")
 GBTModel = GBTRegressionModel.load('./model/gbt_model1')
-@app.route('/')
+
+class SalaryPredictionRequest(BaseModel):
+    companyId: str
+    jobType: str
+    degree: str
+    major: str
+    industry: str
+    yearsExperience: int
+    milesFromMetropolis: int
+
+@app.get("/")
 def home():
-    return "Employee Salary Prediction API is running!"
+    return {"message": "Employee Salary Prediction API is running!"}
 
-@app.route('/predict', methods=['POST'])
-def predict_salary():
-    data = request.json
-
-    # Check if all required fields are present in the request
-    required_fields = ["companyId", "jobType", "degree", "major", "industry", "yearsExperience", "milesFromMetropolis"]
-    if not all(field in data for field in required_fields):
-        return jsonify({"error": "Missing required fields"}), 400
+@app.post("/predict")
+def predict_salary(request: SalaryPredictionRequest):
+    data = request.dict()
 
     # Convert the JSON data to a Spark DataFrame
     new_data = spark.createDataFrame([(
@@ -35,20 +48,19 @@ def predict_salary():
         data['degree'],
         data['major'],
         data['industry'],
-        int(data['yearsExperience']),
-        int(data['milesFromMetropolis'])
+        data['yearsExperience'],
+        data['milesFromMetropolis']
     )], ["companyId", "jobType", "degree", "major", "industry", "yearsExperience", "milesFromMetropolis"])
 
     # Transform the new data using the pipeline
     transformed_new_data = pipelineModel.transform(new_data)
 
-    # Make predictions
-    predictions = GBTModel.transform(transformed_new_data)
+    # Predict the salary
+    predictions = transformed_new_data.select("prediction").collect()
+    predicted_salary = predictions[0]["prediction"]
 
-    # Get the predicted salary
-    predicted_salary = predictions.select("prediction").collect()[0]["prediction"]
-
-    return jsonify({"predicted_salary": predicted_salary})
+    return {"predicted_salary": predicted_salary}
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
