@@ -23,7 +23,7 @@ const SalaryPrediction = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const API_URL = 'https://9602-34-139-137-139.ngrok-free.app/predict';
+  const API_URL = 'https://employee-salary-prediction-5lz69kfy2-sathiyaseelan-ss-projects.vercel.app/';
 useEffect(() => {
     const fetchOptionsFromCSV = async () => {
       try {

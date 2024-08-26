@@ -60,7 +60,3 @@ def predict_salary(request: SalaryPredictionRequest):
     predicted_salary = predictions[0]["prediction"]
 
     return {"predicted_salary": predicted_salary}
-
-if __name__ == '__main__':
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
