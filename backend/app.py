@@ -1,62 +1,41 @@
-import os
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-from pyspark.sql import SparkSession
-from pyspark.ml import PipelineModel
-from pyspark.ml.regression import GBTRegressionModel
-from fastapi.middleware.cors import CORSMiddleware
+from flask import Flask, request, jsonify
+import pandas as pd
+from joblib import load
 
-app = FastAPI()
+# Initialize Flask application
+app = Flask(__name__)
 
-# Enable CORS
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # Allows all origins
-    allow_credentials=True,
-    allow_methods=["*"],  # Allows all methods
-    allow_headers=["*"],  # Allows all headers
-)
+# Load the pre-trained model
+model = load('./gbt_model.joblib')  # Replace with the actual path to your joblib file
 
-# Initialize Spark session
-spark = SparkSession.builder.appName('SalaryPrediction').getOrCreate()
+# Define a route to handle prediction requests
+@app.route('/predict', methods=['POST'])
+def predict():
+    try:
+        # Get JSON data from the request
+        data = request.get_json()
 
-# Load your pipeline model
-pipelineModel = PipelineModel.load("./model/pipeline_model_gbt")
-GBTModel = GBTRegressionModel.load('./model/gbt_model1')
+        # Convert the JSON data into a pandas DataFrame
+        df = pd.DataFrame(data)
 
-class SalaryPredictionRequest(BaseModel):
-    companyId: str
-    jobType: str
-    degree: str
-    major: str
-    industry: str
-    yearsExperience: int
-    milesFromMetropolis: int
+        # Preprocess the data as done during training
+        df = df.drop(['companyId', 'jobId'], axis=1)
+        df = df.replace('NONE', pd.NA)
+        for col in df.columns:
+            if df[col].dtype == 'object':
+                df[col] = df[col].fillna(df[col].mode()[0])
+            else:
+                df[col] = df[col].fillna(df[col].median())
 
-@app.get("/")
-def home():
-    return {"message": "Employee Salary Prediction API is running!"}
+        # Make predictions using the loaded model
+        predictions = model.predict(df)
 
-@app.post("/predict")
-def predict_salary(request: SalaryPredictionRequest):
-    data = request.dict()
+        # Return the predictions as JSON
+        return jsonify({'predictions': predictions.tolist()})
 
-    # Convert the JSON data to a Spark DataFrame
-    new_data = spark.createDataFrame([(
-        data['companyId'],
-        data['jobType'],
-        data['degree'],
-        data['major'],
-        data['industry'],
-        data['yearsExperience'],
-        data['milesFromMetropolis']
-    )], ["companyId", "jobType", "degree", "major", "industry", "yearsExperience", "milesFromMetropolis"])
+    except Exception as e:
+        return jsonify({'error': str(e)})
 
-    # Transform the new data using the pipeline
-    transformed_new_data = pipelineModel.transform(new_data)
-
-    # Predict the salary
-    predictions = transformed_new_data.select("prediction").collect()
-    predicted_salary = predictions[0]["prediction"]
-
-    return {"predicted_salary": predicted_salary}
+# Run the Flask application
+if __name__ == '__main__':
+    app.run(debug=True)

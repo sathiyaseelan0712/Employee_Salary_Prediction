@@ -1,7 +1,9 @@
 services:
   - type: web
-    name: employee-salary-prediction
+    name: employee-salary-prediction-backend
     env: python
-    plan: free
-    buildCommand: "pip install -r requirements.txt"
-    startCommand: "./start.sh"
+    buildCommand: ""
+    startCommand: python app.py
+    envVars:
+      - key: PORT
+        value: 5000
