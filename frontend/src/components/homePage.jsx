@@ -172,17 +172,19 @@ const SalaryPrediction = () => {
                 value=""
                 className={`bg-black text-red-500 hover:text-green-500 hover:bg-black`}
               >
-                Select a major
+                Select a degree
               </option>
-              {options.majors.map((major, index) => (
+              {options.degrees.map((degree, index) => (
                 <option
                   key={index}
-                  value={major}
+                  value={degree}
                   className={`bg-black text-red-500 hover:text-green-500 hover:bg-black ${
-                    formData.major === major ? "text-green-500" : "text-red-500"
+                    formData.degree === degree
+                      ? "text-green-500"
+                      : "text-red-500"
                   }`}
                 >
-                  {major}
+                  {degree}
                 </option>
               ))}
             </select>
