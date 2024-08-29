@@ -1,6 +1,6 @@
 # Employee Salary Prediction
 
-This project is a web application for predicting employee salaries based on various input features. The frontend is built with React, and the backend is built with Flask.
+This project is a web application that predicts employee salaries based on various input features. The frontend is built with React, and the backend is powered by Flask. The machine learning model uses the Gradient Boosting algorithm to provide accurate salary predictions.
 
 ## Prerequisites
 
@@ -75,7 +75,7 @@ This project is a web application for predicting employee salaries based on vari
 
 ### Deploying the Frontend on Render
 
-1. **Create a [`render.yaml`](command:_github.copilot.openRelativePath?%5B%7B%22scheme%22%3A%22file%22%2C%22authority%22%3A%22%22%2C%22path%22%3A%22%2Fe%3A%2FEmployee%20Salary%20Prediction%2Ffrontend%2Frender.yaml%22%2C%22query%22%3A%22%22%2C%22fragment%22%3A%22%22%7D%5D "e:\Employee Salary Prediction\frontend\render.yaml") file in the root of your project directory:**
+1. **Create a `render.yaml` file in the root of your project directory:**
 
     ```yaml
     services:
@@ -96,23 +96,30 @@ This project is a web application for predicting employee salaries based on vari
     - Go to the [Render dashboard](https://dashboard.render.com/).
     - Click on "New" and select "Web Service".
     - Connect your GitHub repository.
-    - Render will automatically detect the [`render.yaml`](command:_github.copilot.openRelativePath?%5B%7B%22scheme%22%3A%22file%22%2C%22authority%22%3A%22%22%2C%22path%22%3A%22%2Fe%3A%2FEmployee%20Salary%20Prediction%2Ffrontend%2Frender.yaml%22%2C%22query%22%3A%22%22%2C%22fragment%22%3A%22%22%7D%5D "e:\Employee Salary Prediction\frontend\render.yaml") file and use it to configure your service.
+    - Render will automatically detect the `render.yaml` file and use it to configure your service.
 
 3. **Access the Deployed Application:**
 
     - Once the deployment is complete, you will receive a URL where your application is hosted.
 
+    - **Frontend Deployment Link:** [https://salaryprediction-8awy.onrender.com](https://salaryprediction-8awy.onrender.com)
+
+## Machine Learning Model
+
+The salary prediction model is built using the Gradient Boosting algorithm, a powerful ensemble technique that combines the predictions of several base models to improve accuracy and robustness. The model is trained on various employee-related features such as job type, degree, major, industry, years of experience, and distance from a metropolis.
+
+## Dependencies
+
+Key dependencies for the project:
+
+- **Flask:** A lightweight WSGI web application framework for Python.
+- **Flask-Cors:** A Flask extension for handling Cross-Origin Resource Sharing (CORS).
+- **pandas:** A powerful data manipulation and analysis library for Python.
+- **scikit-learn:** A machine learning library for Python, used for building the Gradient Boosting model.
+- **numpy:** A fundamental package for scientific computing with Python.
+
 ## Accessing the Application
 
-- **Frontend Deployment Link:** [Your Render Deployment Link](https://your-render-deployment-link.com)
+Make sure that your backend is running and accessible for the frontend to make API calls. Update the API URL in your frontend code if necessary to match the deployed backend URL.
 
-Replace `https://your-render-deployment-link.com` with the actual URL provided by Render after deployment.
 
-## Additional Information
-
-- Ensure that your backend is running and accessible for the frontend to make API calls.
-- Update the API URL in your frontend code if necessary to match the deployed backend URL.
-
-## License
-
-This project is licensed under the MIT License.

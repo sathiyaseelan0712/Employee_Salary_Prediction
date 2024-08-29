@@ -1,3 +1,5 @@
 BDA_NOMAL.ipynb
 model/
 dataset/
+gbtmodel.pkl
+scaler.pkl
